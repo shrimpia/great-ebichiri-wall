@@ -1,0 +1,10 @@
+name = "workers-block-ngword-in-post-body"
+compatibility_date = "2023-12-01"
+main = "./src/index.js"
+
+# [vars]
+# MY_VARIABLE = "production_value"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "dc1d47508dc74bddb2e9563abc51fc9a"

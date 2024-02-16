@@ -22,9 +22,9 @@ export default {
     const body = await request.text();
 
     try {
-      const cc = JSON.parse(body).cc.length
+      const bodyJson = JSON.parse(body)
+      const cc = bodyJson.cc?.length ?? 0;
       if (cc > 6) {
-
         return new Response(JSON.stringify({
           error: {
             message: 'その投稿にはメンションが多すぎます。',

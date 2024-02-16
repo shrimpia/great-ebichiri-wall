@@ -24,7 +24,8 @@ export default {
           id: 'c1d9e31a-85ee-45b9-9456-7c749fc4f475',
         }
       }), {
-        status: 400,
+        // Note: ActivityPubで400を返してしまうとリモートからのretryが相次いだり、最悪配送停止されてしまったりするので、inboxでは202を返す
+        status: request.url.includes('inbox') ? 202 : 400,
       });
     }
 

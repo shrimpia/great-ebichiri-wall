@@ -23,9 +23,10 @@ export default {
 
     // NGワードを含む場合はエラーで弾く
     if (hasBadWords(body, badWords)) {
+      const message = (await env.KV.get('errorMessage') ?? 'その投稿には不適切な単語が含まれています。')
       return new Response(JSON.stringify({
         error: {
-          message: 'その投稿には不適切な単語が含まれています。',
+          message: message,
           code: 'BAD_WORDS',
           id: 'c1d9e31a-85ee-45b9-9456-7c749fc4f475',
         }

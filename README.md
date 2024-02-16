@@ -20,6 +20,7 @@ Cloudflare Workersで動作するMisskey APIおよびActivityPub inboxへのNG�
   - `あなたのドメイン/inbox`
   - `あなたのドメイン/users/*`
 
+6. (オプション) KVに「errorMessage」という名前でメッセージを入力するとエラーメッセージをカスタムできます
 ## ライセンス
 
 CC0

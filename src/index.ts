@@ -11,6 +11,7 @@ const hasBadWords = (text: string, badWords: string[]) => {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const badWords = (await env.KV.get('badWords') ?? '').split(';').filter(w => w != '');
+    const cclimit = (await env.KV.get('cclimit') ?? '6');
 
     // HEADやGETの場合はそのまま返す
     if (request.method === 'HEAD' || request.method === 'GET') {
@@ -24,7 +25,7 @@ export default {
     try {
       const bodyJson = JSON.parse(body)
       const cc = bodyJson.cc?.length ?? 0;
-      if (cc > 6) {
+      if (cc > cclimit) {
         return new Response(JSON.stringify({
           error: {
             message: 'その投稿にはメンションが多すぎます。',

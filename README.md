@@ -1,6 +1,8 @@
-# Misskey APIおよびinboxへのNGワードフィルター
+# グレートエビチリウォール
 
 Cloudflare Workersで動作するMisskey APIおよびActivityPub inboxへのNGワードフィルターです。
+
+シュリンピア帝国内での利用を想定して開発していますが、Cloudflareに通したMisskeyという環境であれば、よそでもおそらく動くと思います。
 
 ## 利用方法
 

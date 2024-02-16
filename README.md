@@ -6,7 +6,7 @@ Cloudflare Workersで動作するMisskey APIおよびActivityPub inboxへのNG�
 
 ## 利用方法
 
-1. `npx wrangler kv:namespace KV` でKVを作成する
+1. `npx wrangler kv:namespace create KV` でKVを作成する
 
 2. 払い出された `id` で、 `wrangler.toml` の `kv_namespaces.id` を置き換える
 

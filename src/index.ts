@@ -25,7 +25,7 @@ export default {
     if (hasBadWords(body, badWords)) {
       return new Response(JSON.stringify({
         error: {
-          message: '死刑',
+          message: 'その投稿には不適切な単語が含まれています。',
           code: 'BAD_WORDS',
           id: 'c1d9e31a-85ee-45b9-9456-7c749fc4f475',
         }
@@ -35,13 +35,10 @@ export default {
       });
     }
 
-    const mkResponse = await fetch(request.url, {
+    return await fetch(request.url, {
       method: 'POST',
       headers: request.headers,
       body,
-    });
-    return new Response(await mkResponse.text(), {
-      headers: mkResponse.headers,
     });
   },
 };

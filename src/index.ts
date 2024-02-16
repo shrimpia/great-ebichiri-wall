@@ -1,4 +1,5 @@
 import { hasBadWords } from "./libs/hasBadWords";
+import { useKVWithCache } from "./libs/KVWithCache";
 
 export interface Env {
   KV: KVNamespace;
@@ -6,8 +7,20 @@ export interface Env {
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    const badWords = (await env.KV.get('badWords') ?? '').split(';').filter(w => w != '');
-    const cclimit = Number((await env.KV.get('cclimit') ?? '6'));
+    const KVWithCache = useKVWithCache(env.KV);
+    let badWords: string[] = [];
+    let cclimit: number = 6;
+    try {
+      badWords = (await KVWithCache.get('badWords') ?? '').split(';').filter(w => w != '');
+      cclimit = Number(await KVWithCache.get('cclimit'));
+    } catch (e: any) {
+      // レートリミットに引っかかった場合はバイパスする
+      if (e.message !== "KV get() limit exceeded for the day.") {
+        throw e;
+      } else {
+        console.log("KV get() のリミットに触れたためバイパスしています。")
+      }
+    }
 
     // HEADやGETの場合はそのまま返す
     if (request.method === 'HEAD' || request.method === 'GET') {

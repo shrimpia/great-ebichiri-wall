@@ -23,7 +23,7 @@ By setting additional keys in KV, you can customize the behavior of the Great Pa
 | ------------ | ------------------------------------------------------------------------------------------------- | -------- |
 | errorMessage | You can customize the error message presented to the user.                                        | ERROR!   |
 | cclimit      | Specify the number of mentions to restrict via ActivityPub. If not specified, it defaults to '6'. | 6        |
-| atlimit      | Specify the maximum number of mentions (@) for users.                                             | 3        |
+| atlimit      | Specify the maximum number of mentions (@) for users.If not specified, it defaults to '3'.        | 3        |
 
 atLimit will **NOT** affect the number of people mentioned in the reply.
 

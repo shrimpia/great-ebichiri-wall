@@ -11,7 +11,7 @@ const hasBadWords = (text: string, badWords: string[]) => {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const badWords = (await env.KV.get('badWords') ?? '').split(';').filter(w => w != '');
-    const cclimit = (await env.KV.get('cclimit') ?? '6');
+    const cclimit = Number((await env.KV.get('cclimit') ?? '6'));
 
     // HEADやGETの場合はそのまま返す
     if (request.method === 'HEAD' || request.method === 'GET') {

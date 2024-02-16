@@ -1,30 +1,36 @@
-# グレートエビチリウォール
+# great-pari-wall
 
-Cloudflare Workersで動作するMisskey APIおよびActivityPub inboxへのNGワードフィルターです。
+This is an spam filter for Misskey API and ActivityPub inbox designed to operate on Cloudflare Workers.
 
-シュリンピア帝国内での利用を想定して開発していますが、Cloudflareに通したMisskeyという環境であれば、よそでもおそらく動くと思います。
+## Deployment
 
-## 利用方法
+0. Install Node.js and Wrangler `npm install wrangler --save-dev`
+1. `npx wrangler kv:namespace create KV` Create a Key-Value (KV) store.
+2. With the assigned `id`, replace `kv_namespaces.id`(YOUR_KV_ID) in `wrangler.toml`.
+3. `pnpm run deploy` Deploy.
+4. Register prohibited words in the KV store with the key `badWords` (multiple entries can be separated by `;`)
+5. Add a route to Workers Routes.
+   - `[YourDomain]/api/notes/create`
+   - `[YourDomain]/api/i/update`
+   - `[YourDomain]/inbox`
+   - `[YourDomain]/users/*`
 
-1. `npx wrangler kv:namespace create KV` でKVを作成する
-2. 払い出された `id` で、 `wrangler.toml` の `kv_namespaces.id` を置き換える
-3. `pnpm run deploy` でデプロイする
-4. KVに「badWords」というキーでNGワードを登録する（ `;` で区切ると複数個登録できます）
-5. Workers Routesにルートを追加する
-  - `あなたのドメイン/api/notes/create`
-  - `あなたのドメイン/api/i/update`
-  - `あなたのドメイン/inbox`
-  - `あなたのドメイン/users/*`
+## Customize KV
 
-## カスタマイズ
+By setting additional keys in KV, you can customize the behavior of the Great Pari Wall.
 
-KVに追加のキーを設定すると、グレートエビチリウォールの挙動をカスタマイズできます。
+| Key          | Value                                                                                             | Examples |
+| ------------ | ------------------------------------------------------------------------------------------------- | -------- |
+| errorMessage | You can customize the error message presented to the user.                                        | ERROR!   |
+| cclimit      | Specify the number of mentions to restrict via ActivityPub. If not specified, it defaults to '6'. | 6        |
+| atlimit      | Specify the maximum number of mentions (@) for users.                                             | 3        |
 
-|キー|説明|記入例|
-|---|----|------|
-|errorMessage|ユーザーに提示するエラーメッセージをカスタマイズできます。|$[x4 死刑]|
-|cclimit|ActivityPub経由で、制限するメンションの数を指定します。指定がない場合は「6」です。|6|
+atLimit will **NOT** affect the number of people mentioned in the reply.
 
-## ライセンス
+## Credits
+
+[shrimpia/great-ebichiri-wall](https://github.com/shrimpia/great-ebichiri-wall)
+
+## License
 
 CC0

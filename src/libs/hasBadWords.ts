@@ -1,13 +1,13 @@
 import { match } from "../libs/match";
 
 /**
- * [text] が [badWords] のいずれかにマッチするかどうかを判定する
+ * Determines whether [text] matches any of the [badWords].
  * @param text
  * @param badWords
- * @returns マッチする場合は true、しない場合は false
+ * @returns True if there is a match, false otherwise.
  */
 export const hasBadWords = (text: string, badWords: string[]) => {
-  // 対策用の区切り文字などを削除して判定する
+  // Remove delimiters used for countermeasures and then perform the evaluation.
   const normalizedText = text.replace(/[ /　／]/g, '');
   return badWords.length > 0 && badWords.some(word => match(normalizedText, word));
 };

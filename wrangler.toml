@@ -7,4 +7,4 @@ main = "./src/index.js"
 
 [[kv_namespaces]]
 binding = "KV"
-id = "dc1d47508dc74bddb2e9563abc51fc9a"
+id = "YOUR_KV_ID"

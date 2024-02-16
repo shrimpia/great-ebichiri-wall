@@ -1,8 +1,8 @@
 /**
- * [text] が 正規表現 [pattern] にマッチするかどうかを判定する
+ * Determines whether [text] matches the regular expression [pattern].
  * @param text
  * @param pattern
- * @returns マッチする場合は true、しない場合は false
+ * @returns True if there is a match, false otherwise.
  */
 
 export const regexpMatch = (text: string, pattern: string) => {
@@ -11,7 +11,7 @@ export const regexpMatch = (text: string, pattern: string) => {
     return regexp.test(text);
   } catch (e) {
     if (e instanceof SyntaxError) {
-      // 正規表現が不正な場合はマッチしないものとしてしまう
+      // If the regular expression is invalid, it will be treated as a non-match.
       return false;
     } else {
       throw e;

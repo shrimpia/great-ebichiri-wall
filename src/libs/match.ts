@@ -2,10 +2,10 @@ import { regexpMatch } from "./regexpMatch";
 import { simpleMatch } from "./simpleMatch";
 
 /**
- * [text] に [word] が含まれるか、あるいは正規表現としてマッチするかを判定する
- * @param text 判定するテキスト
- * @param word マッチするかどうかを判定する単語。/で囲まれている場合は正規表現として扱う
- * @returns マッチする場合は true、しない場合は false
+ * Determines whether [word] is included in [text] or matches as a regular expression.
+ * @param text The text to be evaluated.
+ * @param word The word or regular expression pattern to check for. If enclosed in /, it is treated as a regular expression.
+ * @returns True if there is a match, false otherwise.
  */
 export const match = (text: string, word: string) => {
   if (word.startsWith('/') && word.endsWith('/')) {

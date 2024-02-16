@@ -8,8 +8,9 @@ export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const badWords = (await env.KV.get('badWords') ?? '').split(';').filter(w => w != '');
     const cclimit = Number((await env.KV.get('cclimit') ?? '6'));
+    const atLimit = Number((await env.KV.get('atLimit') ?? '3')); // Set the maximum allowed mentions
 
-    // HEADやGETの場合はそのまま返す
+    // If the request method is HEAD or GET, return it as it is.
     if (request.method === 'HEAD' || request.method === 'GET') {
       return await fetch(request.url, {
         method: request.method,
@@ -19,17 +20,33 @@ export default {
     const body = await request.text();
 
     try {
-      const bodyJson = JSON.parse(body)
+      const bodyJson = JSON.parse(body);
       const cc = bodyJson.cc?.length ?? 0;
+
+      // Check if mentions exceed the limit
+      const mentions = (bodyJson.text || '').match(/@.*?\..*?@/g) || [];
+      if (mentions.length > atLimit) {
+        return new Response(JSON.stringify({
+          error: {
+            message: 'Too many Ats.',
+            code: 'TOO_MANY_ATS',
+            id: 'c7e10ff1-042f-441a-b490-836956560650',
+          }
+        }), {
+          // Note: Returning a 400 in ActivityPub may result in repeated retries from the remote or, in the worst case, delivery suspension. Therefore, return a 202 for 'inbox'.
+          status: request.url.includes('inbox') ? 202 : 400,
+        });
+      }
+
       if (cc > cclimit) {
         return new Response(JSON.stringify({
           error: {
-            message: 'その投稿にはメンションが多すぎます。',
+            message: 'Too many mentions.',
             code: 'BAD_WORDS',
-            id: 'c1d9e31a-85ee-45b9-9456-7c749fc4f475',
+            id: 'c7e10ff1-042f-441a-b490-836956560650',
           }
         }), {
-          // Note: ActivityPubで400を返してしまうとリモートからのretryが相次いだり、最悪配送停止されてしまったりするので、inboxでは202を返す
+          // Note: Returning a 400 in ActivityPub may lead to repeated retries from the remote or, in the worst case, delivery suspension. Therefore, return a 202 in the case of 'inbox'.
           status: request.url.includes('inbox') ? 202 : 400,
         });
       }
@@ -38,17 +55,17 @@ export default {
       // do nothing
     }
 
-    // NGワードを含む場合はエラーで弾く
+    // If the text contains prohibited words, reject it with an error.
     if (hasBadWords(body, badWords)) {
-      const message = (await env.KV.get('errorMessage') ?? 'その投稿には不適切な単語が含まれています。')
+      const message = (await env.KV.get('errorMessage') ?? 'Bad words contained.')
       return new Response(JSON.stringify({
         error: {
           message: message,
           code: 'BAD_WORDS',
-          id: 'c1d9e31a-85ee-45b9-9456-7c749fc4f475',
+          id: 'c7e10ff1-042f-441a-b490-836956560650',
         }
       }), {
-        // Note: ActivityPubで400を返してしまうとリモートからのretryが相次いだり、最悪配送停止されてしまったりするので、inboxでは202を返す
+        // Note: Returning a 400 in ActivityPub may result in repeated retries from the remote or, in the worst case, delivery suspension. Therefore, return a 202 for 'inbox'
         status: request.url.includes('inbox') ? 202 : 400,
       });
     }

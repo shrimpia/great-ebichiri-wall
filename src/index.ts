@@ -2,6 +2,12 @@ export interface Env {
   KV: KVNamespace;
 }
 
+const hasBadWords = (text: string, badWords: string[]) => {
+  // 対策用の区切り文字などを削除して判定する
+  const normalizedText = text.replace(/[ /　／]/g, '');
+  return badWords.length > 0 && badWords.some(word => normalizedText.includes(word));
+};
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const badWords = (await env.KV.get('badWords') ?? '').split(';');
@@ -15,8 +21,8 @@ export default {
     }
     const body = await request.text();
 
-    // NGワードを含む場合は400を返す
-    if (badWords.length > 0 && badWords.some(word => body.includes(word))) {
+    // NGワードを含む場合はエラーで弾く
+    if (hasBadWords(body, badWords)) {
       return new Response(JSON.stringify({
         error: {
           message: '死刑',

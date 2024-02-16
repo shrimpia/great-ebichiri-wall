@@ -10,7 +10,7 @@ const hasBadWords = (text: string, badWords: string[]) => {
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    const badWords = (await env.KV.get('badWords') ?? '').split(';');
+    const badWords = (await env.KV.get('badWords') ?? '').split(';').filter(w => w != '');
 
     // HEADやGETの場合はそのまま返す
     if (request.method === 'HEAD' || request.method === 'GET') {
@@ -40,7 +40,6 @@ export default {
     } catch (e) {
       // do nothing
     }
-
 
     // NGワードを含む場合はエラーで弾く
     if (hasBadWords(body, badWords)) {

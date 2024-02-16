@@ -1,12 +1,8 @@
+import { hasBadWords } from "./libs/hasBadWords";
+
 export interface Env {
   KV: KVNamespace;
 }
-
-const hasBadWords = (text: string, badWords: string[]) => {
-  // 対策用の区切り文字などを削除して判定する
-  const normalizedText = text.replace(/[ /　／]/g, '');
-  return badWords.length > 0 && badWords.some(word => normalizedText.includes(word));
-};
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {

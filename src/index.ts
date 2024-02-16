@@ -21,6 +21,27 @@ export default {
     }
     const body = await request.text();
 
+    try {
+      const cc = JSON.parse(body).cc.length
+      if (cc > 6) {
+
+        return new Response(JSON.stringify({
+          error: {
+            message: 'その投稿にはメンションが多すぎます。',
+            code: 'BAD_WORDS',
+            id: 'c1d9e31a-85ee-45b9-9456-7c749fc4f475',
+          }
+        }), {
+          // Note: ActivityPubで400を返してしまうとリモートからのretryが相次いだり、最悪配送停止されてしまったりするので、inboxでは202を返す
+          status: request.url.includes('inbox') ? 202 : 400,
+        });
+      }
+
+    } catch (e) {
+      // do nothing
+    }
+
+
     // NGワードを含む場合はエラーで弾く
     if (hasBadWords(body, badWords)) {
       return new Response(JSON.stringify({

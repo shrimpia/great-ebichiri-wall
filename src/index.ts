@@ -1,4 +1,5 @@
 import { hasBadWords } from "./libs/hasBadWords";
+import { useKVWithCache } from "./libs/KVWithCache";
 
 export interface Env {
   KV: KVNamespace;
@@ -7,8 +8,8 @@ export interface Env {
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
     const badWords = (await env.KV.get('badWords') ?? '').split(';').filter(w => w != '');
-    const cclimit = Number((await env.KV.get('cclimit') ?? '6'));
-    const atLimit = Number((await env.KV.get('atLimit') ?? '3')); // Set the maximum allowed mentions
+    const ccLimit = Number((await env.KV.get('ccLimit') ?? '4'));
+    const atLimit = Number((await env.KV.get('atLimit') ?? '4')); // Set the maximum allowed mentions
 
     // If the request method is HEAD or GET, return it as it is.
     if (request.method === 'HEAD' || request.method === 'GET') {
@@ -38,11 +39,11 @@ export default {
         });
       }
 
-      if (cc > cclimit) {
+      if (cc > ccLimit) {
         return new Response(JSON.stringify({
           error: {
             message: 'Too many mentions.',
-            code: 'BAD_WORDS',
+            code: 'TOO_MANY_MENTIONS',
             id: 'c7e10ff1-042f-441a-b490-836956560650',
           }
         }), {

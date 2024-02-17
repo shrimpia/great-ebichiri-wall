@@ -5,13 +5,15 @@ export type KVWithCache = {
 };
 
 /**
- * [text] が [badWords] のいずれかにマッチするかどうかを判定する
+ * KVをキャッシュを用いて取得するKVWithCacheオブジェクトを返す
  * @param KVNamespace
  * @returns getの他、getTTLとdeleteCacheのFunctionを持つKVWithCacheオブジェクト
  */
 export const useKVWithCache = (KV: KVNamespace) : KVWithCache => {
   let _ttl = 120;
   const cache = caches.default;
+
+  // キャッシュにはURL形式にする必要があるため （ただし実在のURLでなくてもよいし、実在するものでも問題ない）
   const cacheprefix = "https://example.com/";
   return {
     async getTTL() {

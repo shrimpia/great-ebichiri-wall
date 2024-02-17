@@ -1,5 +1,4 @@
 import { hasBadWords } from "./libs/hasBadWords";
-import { useKVWithCache } from "./libs/KVWithCache";
 
 export interface Env {
   KV: KVNamespace;

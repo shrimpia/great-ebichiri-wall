@@ -6,24 +6,9 @@ export interface Env {
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    const getFromCache = async (key: string, defaultValue: string, cacheTtl: number): Promise<string> => {
-      let cachedValue = await env.KV.get(key, { cacheTtl });
-  
-      if (cachedValue === null) {
-        cachedValue = await env.KV.get(key, { cacheTtl });
-        if (cachedValue === null) {
-          cachedValue = defaultValue;
-        } else {
-          await env.KV.put(key, cachedValue, { expirationTtl: cacheTtl });
-        }
-      }
-  
-      return cachedValue;
-    };
-  
-    const badWords = (await getFromCache('badWords', '', 300)).split(';').filter(w => w !== '');
-    const ccLimit = Number(await getFromCache('ccLimit', '4', 3600));
-    const atLimit = Number(await getFromCache('atLimit', '4', 3600));
+    const badWords = (await env.KV.get('badWords', { cacheTtl: 300 }) ?? '').split(';').filter(w => w != '');
+    const ccLimit = Number((await env.KV.get('ccLimit', { cacheTtl: 3600 }) ?? '4'));
+    const atLimit = Number((await env.KV.get('atLimit', { cacheTtl: 3600 }) ?? '4'));
 
     // HEADやGETの場合はそのまま返す
     if (request.method === 'HEAD' || request.method === 'GET') {

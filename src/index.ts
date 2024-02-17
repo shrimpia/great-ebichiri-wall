@@ -1,5 +1,4 @@
 import { hasBadWords } from "./libs/hasBadWords";
-import { useKVWithCache } from "./libs/KVWithCache";
 
 export interface Env {
   KV: KVNamespace;
@@ -7,27 +6,19 @@ export interface Env {
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    const badWords = (await env.KV.get('badWords') ?? '').split(';').filter(w => w != '');
-    const ccLimit = Number((await env.KV.get('ccLimit') ?? '4'));
-    const atLimit = Number((await env.KV.get('atLimit') ?? '4')); // Set the maximum allowed mentions
+    const getFromCache = async (key: string, defaultValue: string, cacheTtl: number): Promise<string> => {
+      const cachedValue = await env.KV.get(key, { cacheTtl });
+      if (cachedValue !== null) {
+        return cachedValue;
+      } else {
+        await env.KV.put(key, defaultValue, { expirationTtl: cacheTtl });
+        return defaultValue;
+      }
+    };
 
-    //  //Due to some problems, KVWithCache has been temporarily disabled.
-    //const KVWithCache = useKVWithCache(env.KV);
-    //let badWords: string[] = [];
-    //let ccLimit: number = 4;
-    //let atLimit: number = 4;
-    //try {
-    //  badWords = (await KVWithCache.get('badWords') ?? '').split(';').filter(w => w != '');
-    //  ccLimit = Number(await KVWithCache.get('ccLimit'));
-    //  atLimit = Number(await KVWithCache.get('atLimit'));
-    //} catch (e: any) {
-    //  // Bypass if hitting the rate limit.
-    //  if (e.message !== "KV get() limit exceeded for the day.") {
-    //    throw e;
-    //  } else {
-    //    console.log("Bypassing the KV get() limit as it has been reached.")
-    //  }
-    //}
+    const badWords = (await getFromCache('badWords', '', 300)).split(';').filter(w => w != '');
+    const ccLimit = Number(await getFromCache('ccLimit', '5', 3600));
+    const atLimit = Number(await getFromCache('atLimit', '4', 3600));
 
     // If the request method is HEAD or GET, return it as it is.
     if (request.method === 'HEAD' || request.method === 'GET') {

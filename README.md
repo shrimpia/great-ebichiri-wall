@@ -6,7 +6,7 @@ This is an spam filter for Misskey API and ActivityPub inbox designed to operate
 
 0. Install Node.js and Wrangler `npm install wrangler --save-dev`
 1. `npx wrangler kv:namespace create KV` Create a Key-Value (KV) store.
-2. With the assigned `id`, replace `kv_namespaces.id`(YOUR_KV_ID) in `wrangler.toml`.(It is recommended to modify the `cacheprefix` value in `KVWithCache.ts`)
+2. With the assigned `id`, replace `kv_namespaces.id`(YOUR_KV_ID) in `wrangler.toml`. (And it is recommended to modify the `cacheprefix` value in `KVWithCache.ts`)
 3. `pnpm run deploy` Deploy.
 4. Register prohibited words in the KV store with the key `badWords` (multiple entries can be separated by `;`)
 5. Add a route to Workers Routes.

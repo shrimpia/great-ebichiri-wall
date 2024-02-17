@@ -7,8 +7,19 @@ export interface Env {
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    const badWords = (await env.KV.get('badWords') ?? '').split(';').filter(w => w != '');
-    const cclimit = Number((await env.KV.get('cclimit') ?? '6'));
+    const getFromCache = async (key: string, defaultValue: string, cacheTtl: number): Promise<string> => {
+      const cachedValue = await env.KV.get(key, { cacheTtl });
+      if (cachedValue !== null) {
+        return cachedValue;
+      } else {
+        await env.KV.put(key, defaultValue, { expirationTtl: cacheTtl });
+        return defaultValue;
+      }
+    };
+
+    const badWords = (await getFromCache('badWords', '', 300)).split(';').filter(w => w != '');
+    const ccLimit = Number(await getFromCache('ccLimit', '4', 3600));
+    const atLimit = Number(await getFromCache('atLimit', '4', 3600));
 
     // HEADやGETの場合はそのまま返す
     if (request.method === 'HEAD' || request.method === 'GET') {
@@ -22,7 +33,7 @@ export default {
     try {
       const bodyJson = JSON.parse(body)
       const cc = bodyJson.cc?.length ?? 0;
-      if (cc > cclimit) {
+      if (cc > ccLimit) {
         return new Response(JSON.stringify({
           error: {
             message: 'その投稿にはメンションが多すぎます。',

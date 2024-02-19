@@ -1,5 +1,4 @@
 import { hasBadWords } from "./libs/hasBadWords";
-import { useKVWithCache } from "./libs/KVWithCache";
 
 export interface Env {
   KV: KVNamespace;
@@ -7,8 +6,9 @@ export interface Env {
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-    const badWords = (await env.KV.get('badWords') ?? '').split(';').filter(w => w != '');
-    const cclimit = Number((await env.KV.get('cclimit') ?? '6'));
+    const badWords = (await env.KV.get('badWords', { cacheTtl: 300 }) ?? '').split(';').filter(w => w != '');
+    const ccLimit = Number((await env.KV.get('ccLimit', { cacheTtl: 3600 }) ?? '4'));
+    const atLimit = Number((await env.KV.get('atLimit', { cacheTtl: 3600 }) ?? '4'));
 
     // HEADやGETの場合はそのまま返す
     if (request.method === 'HEAD' || request.method === 'GET') {
@@ -22,7 +22,23 @@ export default {
     try {
       const bodyJson = JSON.parse(body)
       const cc = bodyJson.cc?.length ?? 0;
-      if (cc > cclimit) {
+
+      // Check if mentions exceed the limit
+      const mentions = (bodyJson.text || '').match(/@.*?@.*?\..*?/g) || [];
+      if (mentions.length > atLimit) {
+        return new Response(JSON.stringify({
+          error: {
+            message: 'Too many Ats.',
+            code: 'TOO_MANY_ATS',
+            id: 'c7e10ff1-042f-441a-b490-836956560650',
+          }
+        }), {
+          // Note: Returning a 400 in ActivityPub may result in repeated retries from the remote or, in the worst case, delivery suspension. Therefore, return a 202 for 'inbox'.
+          status: request.url.includes('inbox') ? 202 : 400,
+        });
+      }
+
+      if (cc > ccLimit) {
         return new Response(JSON.stringify({
           error: {
             message: 'その投稿にはメンションが多すぎます。',
